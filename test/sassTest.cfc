@@ -104,22 +104,7 @@ component extends="coldbox.system.testing.BasePluginTest" {
 		}
 		
 	}
-	
-	function test_isBlank(){
-		// test valid whitespace
-		for(i = 1; i LTE arrayLen(valid_whitespace); i = i + 1){
-			debug(valid_whitespace[i]);
-			assertTrue(sass.isBlank(valid_whitespace[i]));		
-		}
 		
-		// test invalid whitespace
-		for(i = 1; i LTE arrayLen(invalid_whitespace); i = i + 1){
-			debug(invalid_whitespace[i]);
-			assertFalse(sass.isBlank(invalid_whitespace[i]));		
-		}
-		
-	}
-	
 	function test_sass2css(){
 	
 	}

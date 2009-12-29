@@ -107,19 +107,4 @@ component {
 		}
 		return count;
 	}
-	
-	// check if a line is blank
-	function isBlank(string){
-		if(not len(arguments.string)){
-			return true;
-		}
-		else {
-			if(reFind("^\s+$", arguments.string)){
-				return true;
-			}
-			else{
-				return false;
-			}
-		}
-	}
 }
