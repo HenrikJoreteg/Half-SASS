@@ -3,58 +3,98 @@ component {
 	
 	function sass2css(file){
 		var result = '';
+		var line_result = '';
 		var unclosed = 0;
 		var indent = 0;
 		var prev_indent = 0;
-		var prev_selector = false;
-		var curr_selector = '';
-		var this_selector = '';
+		var selector_array = arrayNew(1);
+		var current_selector = '';
+		var array_len = 0;
+		var i = 0;
+		var j = 0;
+		var x = '';
+		var diff = 0;
 		
 		while(NOT FileisEOF(arguments.file)){ 
 			x = FileReadLine(arguments.file);
 			
 			// if it's validly indented
 			if(isValidIndent(x)){
-				indent = getIndent(x);
-				indent = indent / 2;
-			}
-			if(len(trim(x))){
-				// find selectors 
-				if(isSelector(x)){
-					// add open bracket and count it
-					current_selector = trim(x);
-					x = x & "{";
-					unclosed = unclosed + 1;
-					
-					// if it's indented append it
-					if(indent gt 0){
-						current_selector = prev_selector & " " & trim(x);
-						x = current_selector;
-					}
-					
-					// set flag so we know previous row was selector
-					prev_selector = current_selector;
+				position = getIndent(x);
+				if(position EQ 0){
+					position = 1;
 				}
-				else {
-					x = x & ";";
+				else{
+					position = (position / 2) + 1;
 				}
 			}
 			else{
+				// TODO: throw indentation error
+				writeDump(var="it thinks there's an invalid indent", abort=true);
+			}
+			
+			// make sure it's not blank
+			if(len(trim(x))){
+				// is it a selector? 
+				if(isSelector(x)){
+					current_selector = trim(x);
+					
+					// if the indent is zero clear the array and add the current selector
+					if(position EQ 1){
+						ArrayClear(selector_array);
+						selector_array[position] = current_selector;
+					}
+					else {
+						// set current_selector in array
+						selector_array[position] = current_selector;
+						
+						if(arrayLen(selector_array) GT position){
+							diff = arrayLen(selector_array) - position;
+							// delete everything after current in array
+							for(k=1;k lte diff;k=k+1){
+								ArrayDeleteAt(selector_array, k + position);
+							}
+						}
+					}
+					
+					// write out current selector
+					for(j=1; j lte arrayLen(selector_array); j=j+1){
+						if(left(selector_array[j],1) EQ '&'){
+							line_result = line_result & RemoveChars(selector_array[j],1,1);
+						}
+						else{
+							if(j EQ 1){
+								line_result = selector_array[j];
+							}
+							else {
+								line_result = line_result & " " & selector_array[j];
+							}
+						}
+					}
+					
+					// tack on the opening bracket and count it
+					line_result = line_result & "{";
+					unclosed = unclosed + 1;
+				}
+				else {
+					// this is a css rule, append semi-colon
+					line_result = x & ";";
+				}
+			}
+			else{
+				// this is a blank line, close up the unclosed brackets
 				if(unclosed gt 0){
-					x = x & "}";
+					line_result = "}";
 					unclosed = unclosed - 1;
 				}
 			}
-			
-			// set previous indent value
-			prev_indent = getIndent(x) / 2;
-			
+					
 			// add newline character and append to result
-			result = result & "#x##CHR(13)#";
+			result = result & "#line_result##CHR(13)#";
 		} 
 		
-		// close any remaining brackets
-		while(unclosed GT 0){
+		// there may be unclosed brackets at the very end, we need to close those up
+		while(unclosed gt 0){
 			result = result & "}";
 			unclosed = unclosed - 1;
 		}
