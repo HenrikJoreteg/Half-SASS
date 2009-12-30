@@ -109,6 +109,15 @@
 		return result;
 	}
 	
+	function isVar(line){
+		if(REFind("^![0-9a-zA-Z_-]+( +)?=( +)?\S", trim(arguments.line))){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+	
 	function buildSelectorString(selector_array){
 		var j = 1;
 		var result = '';
