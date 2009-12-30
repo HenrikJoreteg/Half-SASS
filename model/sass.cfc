@@ -12,7 +12,7 @@ component {
 		var array_len = 0;
 		var i = 0;
 		var x = '';
-		var diff = 0;
+		
 		
 		while(NOT FileisEOF(arguments.file)){ 
 			x = FileReadLine(arguments.file);
@@ -38,23 +38,8 @@ component {
 				if(isSelector(x)){
 					current_selector = trim(x);
 					
-					// if the indent is zero clear the array and add the current selector
-					if(position EQ 1){
-						ArrayClear(selector_array);
-						selector_array[position] = current_selector;
-					}
-					else {
-						// set current_selector in array
-						selector_array[position] = current_selector;
-						
-						if(arrayLen(selector_array) GT position){
-							diff = arrayLen(selector_array) - position;
-							// delete everything after current in array
-							for(k=1;k lte diff;k=k+1){
-								ArrayDeleteAt(selector_array, k + position);
-							}
-						}
-					}
+					// set the selector into the array
+					selector_array = setSelectorInArray(selector_array, current_selector, position);
 					
 					// build selector string from array
 					line_result = buildSelectorString(selector_array);
@@ -136,6 +121,30 @@ component {
 		}
 		
 		return result;
+	}
+	
+	function setSelectorInArray(selector_array, current_selector, position){
+		var k = 1;
+		var diff = 0;
+		
+		if(arguments.position EQ 1){
+			ArrayClear(arguments.selector_array);
+			arguments.selector_array[arguments.position] = arguments.current_selector;
+		}
+		else {
+			// set current_selector in array
+			arguments.selector_array[arguments.position] = arguments.current_selector;
+			
+			if(arrayLen(arguments.selector_array) GT position){
+				diff = arrayLen(arguments.selector_array) - arguments.position;
+				// delete everything after current in array
+				for(k=1;k lte diff;k=k+1){
+					ArrayDeleteAt(arguments.selector_array, k + arguments.position);
+				}
+			}
+		}
+		
+		return arguments.selector_array;
 	}
 	
 	// test is indent value is allowed
