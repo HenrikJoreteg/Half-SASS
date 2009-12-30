@@ -72,10 +72,11 @@ component {
 						}
 					}
 					
-					// tack on the opening bracket and count it
-					line_result = line_result & "{";
+					// tack on the opening bracket and spacing count it
+					line_result = RepeatString(" ", (position-1)*2) & line_result & "{";
 					unclosed = unclosed + 1;
-				}
+				
+				} // end selector
 				else {
 					// this is a css rule, append semi-colon
 					line_result = x & ";";
@@ -113,10 +114,20 @@ component {
 	}
 	
 	function isSelector(line){
-		if(REFind("^([##\.a-zA-Z_-]|(& ?:)|(& ?>))[ ""'>=0-9a-zA-Z_\[\]\*\.\$\)\(-]+(?!:)([ 0-9a-zA-Z_-]+)?$", trim(arguments.line))){
-			return true;
+		var i = 1;
+		var result = false;
+		
+		for(i = 1; i lte listLen(arguments.line, ','); i=i+1){
+			if(REFind("^([##\.a-zA-Z_-]|(& ?:)|(& ?>))[ ""'>=0-9a-zA-Z_\[\]\*\.\$\)\(\-]+(?!:)([ 0-9a-zA-Z_-]+)?$", trim(listGetAt(arguments.line,i)))){
+				result = true;
+			}
+			else{
+				result = false;
+				break;
+			}
 		}
-		return false;
+		
+		return result;
 	}
 	
 	

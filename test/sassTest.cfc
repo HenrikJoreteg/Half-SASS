@@ -19,7 +19,8 @@ component extends="coldbox.system.testing.BasePluginTest" {
 			"table.hl",
 			".post",
 			"&:lang(fr)",
-			'input[type="checkbox"]'
+			'input[type="checkbox"]',
+			"    &:hover, &:active"
 		];
 		
 		invalid_selectors = [
