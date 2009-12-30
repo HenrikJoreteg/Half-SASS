@@ -11,7 +11,6 @@ component {
 		var current_selector = '';
 		var array_len = 0;
 		var i = 0;
-		var j = 0;
 		var x = '';
 		var diff = 0;
 		
@@ -57,20 +56,8 @@ component {
 						}
 					}
 					
-					// write out current selector
-					for(j=1; j lte arrayLen(selector_array); j=j+1){
-						if(left(selector_array[j],1) EQ '&'){
-							line_result = line_result & RemoveChars(selector_array[j],1,1);
-						}
-						else{
-							if(j EQ 1){
-								line_result = selector_array[j];
-							}
-							else {
-								line_result = line_result & " " & selector_array[j];
-							}
-						}
-					}
+					// build selector string from array
+					line_result = buildSelectorString(selector_array);
 					
 					// tack on the opening bracket and spacing count it
 					line_result = RepeatString(" ", (position-1)*2) & line_result & "{";
@@ -130,6 +117,26 @@ component {
 		return result;
 	}
 	
+	function buildSelectorString(selector_array){
+		var j = 1;
+		var result = '';
+		
+		for(j=1; j lte arrayLen(arguments.selector_array); j=j+1){
+			if(left(arguments.selector_array[j],1) EQ '&'){
+				result = result & RemoveChars(arguments.selector_array[j],1,1);
+			}
+			else{
+				if(j EQ 1){
+					result = arguments.selector_array[j];
+				}
+				else {
+					result = result & " " & arguments.selector_array[j];
+				}
+			}
+		}
+		
+		return result;
+	}
 	
 	// test is indent value is allowed
 	function isValidIndent(line){
