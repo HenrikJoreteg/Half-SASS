@@ -1,4 +1,5 @@
-component {
+<cfcomponent>
+<cfscript>
 	this.currentSelector = '';
 	
 	function sass2css(file){
@@ -8,6 +9,7 @@ component {
 		var indent = 0;
 		var prev_indent = 0;
 		var selector_array = arrayNew(1);
+		var partial_selector_array = arrayNew(1);
 		var current_selector = '';
 		var array_len = 0;
 		var i = 0;
@@ -34,20 +36,25 @@ component {
 			
 			// make sure it's not blank
 			if(len(trim(x))){
-				// is it a selector? 
+				// is it a selector?
 				if(isSelector(x)){
-					current_selector = trim(x);
+					ArrayClear(partial_selector_array);
+					for(i=1; i lte listLen(x,','); i=i+1){
+						current_selector = trim(listGetAt(x,i));
 					
-					// set the selector into the array
-					selector_array = setSelectorInArray(selector_array, current_selector, position);
-					
-					// build selector string from array
-					line_result = buildSelectorString(selector_array);
+						// set the selector into the array
+						selector_array = setSelectorInArray(selector_array, current_selector, position);
+						
+						// build selector string from array
+						current_selector = buildSelectorString(selector_array);
+						
+						ArrayAppend(partial_selector_array, current_selector);	
+					}
 					
 					// tack on the opening bracket and spacing count it
-					line_result = RepeatString(" ", (position-1)*2) & line_result & "{";
+					line_result = RepeatString(" ", (position-1)*2) & ArrayToList(partial_selector_array, ', ') & "{";
 					unclosed = unclosed + 1;
-				
+					
 				} // end selector
 				else {
 					// this is a css rule, append semi-colon
@@ -174,4 +181,11 @@ component {
 		}
 		return count;
 	}
-}
+</cfscript>
+<!--- dump --->
+<cffunction name="dump" access="public" returntype="any" output="false">
+	<cfargument name="myvar">
+	<cfargument name="abort" default="true">
+	<cfdump var="#arguments.myvar#"><cfif arguments.abort><cfabort></cfif>
+</cffunction>
+</cfcomponent>
