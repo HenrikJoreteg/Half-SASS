@@ -124,13 +124,29 @@ component extends="coldbox.system.testing.BasePluginTest" {
 		// test the valid ones
 		for(i = 1; i LTE arrayLen(valid_vars); i = i + 1){
 			debug(valid_vars[i]);
-			assertTrue(sass.isVar(valid_vars[i]));		
+			assertTrue(sass.isVar(valid_vars[i]));
 		}
 		
 		// test the invalid ones
 		for(j = 1; j LTE arrayLen(invalid_vars); j = j + 1){
 			debug(invalid_vars[j]);
 			assertFalse(sass.isVar(invalid_vars[j]));		
+		}
+	}
+	
+	function test_stripQuotes(){
+		a = arraynew(2);
+		a[1] = [" 'test' ","test"];
+		a[2] = ['   "test"  ',"test"];
+		a[3] = ["'test'","test"];
+		a[4] = ['"test"',"test"];
+		a[4] = ['te"st','te"st'];
+		a[5] = ['test','test'];
+		
+		for(i = 1; i LTE arrayLen(a); i++){
+			debug("#a[i][1]# #a[i][2]#");
+			
+			assertEquals(sass.stripQuotes(a[i][1]),a[i][2]);		
 		}
 	}
 		

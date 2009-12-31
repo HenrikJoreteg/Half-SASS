@@ -14,6 +14,9 @@
 		var array_len = 0;
 		var i = 0;
 		var x = '';
+		var var_name = '';
+		var var_value = '';
+		var definitions = structNew();
 		
 		
 		while(NOT FileisEOF(arguments.file)){ 
@@ -48,7 +51,7 @@
 						// build selector string from array
 						current_selector = buildSelectorString(selector_array);
 						
-						ArrayAppend(partial_selector_array, current_selector);	
+						ArrayAppend(partial_selector_array, current_selector);
 					}
 					
 					// tack on the opening bracket and spacing count it
@@ -56,8 +59,15 @@
 					unclosed = unclosed + 1;
 					
 				} // end selector
+				else if(isVar(x)){
+					// this is a variable definition record it
+					definitions[removeChars(trim(listGetAt(x,1,"=")),1,1)] = getVarName(x);
+					//dump(definitions,1);
+				}
 				else {
 					// this is a css rule, append semi-colon
+					// look for variables... swap 'em out
+					
 					line_result = x & ";";
 				}
 			}
@@ -92,6 +102,33 @@
 		return this.currentSelector;
 	}
 	
+	function cssRuleContainsVar(string){
+		// left off here
+		if(REFind(arguments.string,"=( +)?!\S")){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+	
+	function getVarName(string){
+		return stripQuotes(listGetAt(arguments.string,2,"="));
+	}
+	
+	function getVarValue(string){
+		if(structKeyExists(definitions, arguments.string)){
+			return definitions[arguments.string];
+		}
+		else{
+			// TODO: throw error
+		}
+	}
+	
+	function insertVariablesInRule(line){
+		
+	}
+	
 	function isSelector(line){
 		var i = 1;
 		var result = false;
@@ -115,6 +152,28 @@
 		}
 		else{
 			return false;
+		}
+	}
+	
+	function processCSSRule(string){
+		var position = REFind("=( +)?!\S",arguments.string);
+		if(position){
+			//return REReplace(arguments.string,"",) & ';';	
+		}
+		return arguments.string;
+	}
+	
+	function stripQuotes(string){
+		var my_string = trim(arguments.string);
+		var left = left(my_string,1);
+		var right = right(my_string,1);
+		var length = len(my_string);
+		
+		if((left EQ '"' and right EQ '"') or (left EQ "'" and right EQ "'")){
+			return removeChars(removeChars(my_string,1,1),len(my_string)-1,1);
+		}
+		else{
+			return my_string;
 		}
 	}
 	
