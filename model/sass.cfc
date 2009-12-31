@@ -271,7 +271,7 @@
 			if(cssFiles.recordcount){
 				for(j = 1; j lte cssFiles.recordcount; j = j + 1){
 					sassFileName = getFileName(sassFiles.name[i]);
-					cssFileName = getFileName(cssFiles.name[i]);
+					cssFileName = getFileName(cssFiles.name[j]);
 					found = false;
 					
 					if(sassFileName EQ cssFileName){
