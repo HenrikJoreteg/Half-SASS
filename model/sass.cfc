@@ -62,14 +62,13 @@
 				else if(isVar(x)){
 					// this is a variable definition record it
 					instance.definitions[removeChars(trim(listGetAt(x,1,"=")),1,1)] = getDefinitionVarValue(x);
-					//dump(instance.definitions,1);
 				}
 				else {
-					// this is a css rule, append semi-colon
 					// look for variables... swap 'em out
 					if(cssRuleContainsVar(x)){
 						x = insertVariablesInRule(x);
 					}
+					// this is a css rule, append semi-colon
 					line_result = x & ";";
 				}
 			}
@@ -251,6 +250,77 @@
 		return count;
 	}
 </cfscript>
+
+<!---//////////////////////////////// Directory Functuions ////////////////////////////////////--->
+<!--- processSASSFiles --->
+<cffunction name="processSASSFiles" access="public" output="false">
+	<cfargument name="directoryPath">
+	<cfset var sassFiles = 0>
+	<cfset var cssFiles = 0>
+	<cfset var i = 0>
+	<cfset var j = 0>
+	<cfset var found = false>
+	
+	<cfdirectory action="list" directory="arguments.directoryPath" name="sassFiles" filter="*.sass">
+	<cfdirectory action="list" directory="arguments.directoryPath" name="cssFiles" filter="*.css">
+	<cfscript>
+		for(i = 1; i lte sassFiles.recordcount; i = i + 1){
+			
+			if(cssFile.recordcount){
+				for(j = 1; j lte cssFiles.recordcount; j = j + 1){
+					sassFileName = getFileName(sassFiles.name[i]);
+					cssFileName = getFileName(cssFiles.name[i]);
+					found = false;
+					
+					if(sassFileName EQ cssFileName){
+						found = true;
+						if(sassFiles.dateLastModified[i] GT cssFiles.dateLastModified[j]){
+							processSassFile(sassFiles.name[i]);
+						}
+						else{
+							// stop inner loop because we've already found the file
+							break;
+						}
+					}
+					
+					// if we reach the end and haven't found it... process the sass file
+					if(j EQ cssFile.recordcount and not found){
+						processSassFile(sassFiles.name[i]);
+					}
+				}
+			}
+			else {
+				// there are no CSS files so process all SASS files
+				processSassFile(sassFiles.name[i]);
+			}
+		}
+	</cfscript>
+</cffunction>
+
+<!--- getFileName --->
+<cffunction name="getFileName" access="public" output="false">
+	<cfargument name="string">
+	<cfif right(arguments.string,5) EQ ".sass">
+		<cfreturn removeChars(arguments.string, len(arguments.string)-5,5)>
+	</cfif>
+	<cfif right(arguments.string,4) EQ ".css">
+		<cfreturn removeChars(arguments.string, len(arguments.string)-4,4)>
+	</cfif>
+</cffunction>
+
+<!--- processSassFile --->
+<cffunction name="processSassFile" access="public" returntype="any" output="false" hint="">
+	<cfargument name="SASSFile">
+	<cfargument name="directoryPath">
+	<cfset var file = ''>
+	<cfset var css = ''>
+	
+	<cffile action="read" file="#arguments.directoryPath#\#arguments.SASSFile#" variable="file">
+	<cfset css = sass2css(file)>
+	<cffile action="write" output="css" file="#arguments.directoryPath#\#getFileName(arguments.SASSFile)#.css">
+</cffunction>
+
+
 <!--- dump --->
 <cffunction name="dump" access="public" returntype="any" output="false">
 	<cfargument name="myvar">

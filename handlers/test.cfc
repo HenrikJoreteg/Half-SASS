@@ -14,9 +14,19 @@
 		function testSass(Event){
 			var rc = event.getCollection();
 			var sass = getModel("sass");
-			var file = FileOpen("C:\ColdFusion9\wwwroot\FormDaddyDev\static\test.sass");
+			var file = FileOpen("C:\ColdFusion9\wwwroot\FormDaddyDev\includes\css\test.sass");
 			
 			writeOutput(sass.sass2css(file));
+			
+			$abort();
+		}
+		
+		function testSassOnDirectory(Event){
+			var rc = event.getCollection();
+			var sass = getModel("sass");
+			var directory = "C:/ColdFusion9/wwwroot/FormDaddyDev/includes/css";
+			
+			writeOutput(sass.processSASSFiles(directory) & "blah");
 			
 			$abort();
 		}
