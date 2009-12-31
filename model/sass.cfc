@@ -144,7 +144,7 @@
 		var result = false;
 		
 		for(i = 1; i lte listLen(arguments.line, ','); i=i+1){
-			if(REFind("^([##\.a-zA-Z_-]|(& ?:)|(& ?>))[ ""'>=0-9a-zA-Z_\[\]\*\.\$\)\(\-]+(?!:)([ 0-9a-zA-Z_-]+)?$", trim(listGetAt(arguments.line,i)))){
+			if(REFind("^([##\.a-zA-Z_-]|(&:)|(&\.)|(&##))([ ""'>=0-9a-zA-Z_\[\]\*\.\$\)\(\-]+)?(?!:)([ 0-9a-zA-Z_-]+)?$", trim(listGetAt(arguments.line,i)))){
 				result = true;
 			}
 			else{
@@ -241,7 +241,7 @@
 	// get indent of string
 	function getIndent(string){
 		var count = 0;
-		for(i=1; i lte len(arguments.string); i++){
+		for(i=1; i lte len(arguments.string); i=i+1){
 			if(mid(arguments.string, i, "1") EQ " "){
 				count = count + 1;
 			}
@@ -263,12 +263,12 @@
 	<cfset var j = 0>
 	<cfset var found = false>
 	
-	<cfdirectory action="list" directory="arguments.directoryPath" name="sassFiles" filter="*.sass">
-	<cfdirectory action="list" directory="arguments.directoryPath" name="cssFiles" filter="*.css">
+	<cfdirectory action="list" directory="#arguments.directoryPath#" name="sassFiles" filter="*.sass">
+	<cfdirectory action="list" directory="#arguments.directoryPath#" name="cssFiles" filter="*.css">
 	<cfscript>
 		for(i = 1; i lte sassFiles.recordcount; i = i + 1){
 			
-			if(cssFile.recordcount){
+			if(cssFiles.recordcount){
 				for(j = 1; j lte cssFiles.recordcount; j = j + 1){
 					sassFileName = getFileName(sassFiles.name[i]);
 					cssFileName = getFileName(cssFiles.name[i]);
@@ -277,7 +277,7 @@
 					if(sassFileName EQ cssFileName){
 						found = true;
 						if(sassFiles.dateLastModified[i] GT cssFiles.dateLastModified[j]){
-							processSassFile(sassFiles.name[i]);
+							processSassFile(sassFiles.name[i], arguments.directoryPath);
 						}
 						else{
 							// stop inner loop because we've already found the file
@@ -286,14 +286,14 @@
 					}
 					
 					// if we reach the end and haven't found it... process the sass file
-					if(j EQ cssFile.recordcount and not found){
-						processSassFile(sassFiles.name[i]);
+					if(j EQ cssFiles.recordcount and not found){
+						processSassFile(sassFiles.name[i], arguments.directoryPath);
 					}
 				}
 			}
 			else {
 				// there are no CSS files so process all SASS files
-				processSassFile(sassFiles.name[i]);
+				processSassFile(sassFiles.name[i], arguments.directoryPath);
 			}
 		}
 	</cfscript>
@@ -303,10 +303,10 @@
 <cffunction name="getFileName" access="public" output="false">
 	<cfargument name="string">
 	<cfif right(arguments.string,5) EQ ".sass">
-		<cfreturn removeChars(arguments.string, len(arguments.string)-5,5)>
+		<cfreturn removeChars(arguments.string, len(arguments.string)-4,5)>
 	</cfif>
 	<cfif right(arguments.string,4) EQ ".css">
-		<cfreturn removeChars(arguments.string, len(arguments.string)-4,4)>
+		<cfreturn removeChars(arguments.string, len(arguments.string)-3,4)>
 	</cfif>
 </cffunction>
 
@@ -319,7 +319,7 @@
 	
 	<cffile action="read" file="#arguments.directoryPath#\#arguments.SASSFile#" variable="file">
 	<cfset css = sass2css(file)>
-	<cffile action="write" output="css" file="#arguments.directoryPath#\#getFileName(arguments.SASSFile)#.css">
+	<cffile action="write" output="#css#" file="#arguments.directoryPath#\#getFileName(arguments.SASSFile)#.css">
 </cffunction>
 
 
