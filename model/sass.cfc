@@ -19,10 +19,14 @@
 		var var_value = '';
 		var delim = "#chr(10)#";
 		var j = 0;
+		var ignore = false;
 			
 		
 		for(j=1;j lte listLen(file,delim);j=j+1){
 			x = rtrim(listGetAt(file,j,delim));
+			
+			// this is our ignore flag
+			ignore = false;
 			
 			// if it's validly indented
 			if(isValidIndent(x)){
@@ -39,10 +43,9 @@
 				writeDump(var="it thinks there's an invalid indent", abort=true);
 			}
 			
-			// make sure it's not blank
-			if(len(trim(x))){
-				// is it a selector?
-				if(isSelector(x)){
+			
+			switch(whatIsIt(x)){
+				case "selector":{
 					ArrayClear(partial_selector_array);
 					for(i=1; i lte listLen(x,','); i=i+1){
 						current_selector = trim(listGetAt(x,i));
@@ -59,31 +62,40 @@
 					// tack on the opening bracket and spacing count it
 					line_result = RepeatString(" ", (position-1)*2) & ArrayToList(partial_selector_array, ', ') & "{";
 					unclosed = unclosed + 1;
-					
-				} // end selector
-				else if(isVar(x)){
+					break;
+				}
+				case "isVar":{
 					// this is a variable definition record it
 					instance.definitions[removeChars(trim(listGetAt(x,1,"=")),1,1)] = getDefinitionVarValue(x);
+					break;
 				}
-				else {
+				case "quietComment":{
+					// do nothing we just want to ignore this comment
+					ignore = true;
+					break;
+				}
+				case "cssRule":{
 					// look for variables... swap 'em out
 					if(cssRuleContainsVar(x)){
 						x = insertVariablesInRule(x);
 					}
 					// this is a css rule, append semi-colon
 					line_result = x & ";";
+					break;
+				}
+				case "blank":{
+					if(unclosed gt 0){
+						line_result = "}";
+						unclosed = unclosed - 1;
+					}
+					break;
 				}
 			}
-			else{
-				// this is a blank line, close up the unclosed brackets
-				if(unclosed gt 0){
-					line_result = "}";
-					unclosed = unclosed - 1;
-				}
-			}
-					
+								
 			// add newline character and append to result
-			result = result & "#line_result##delim#";
+			if(not ignore){
+				result = result & "#line_result##delim#";
+			}
 		} 
 		
 		// there may be unclosed brackets at the very end, we need to close those up
@@ -137,32 +149,6 @@
 		var var_name = getVarName(arguments.string);
 		
 		return rtrim(left) & ": " & getVarValue(var_name);
-	}
-	
-	function isSelector(line){
-		var i = 1;
-		var result = false;
-		
-		for(i = 1; i lte listLen(arguments.line, ','); i=i+1){
-			if(REFind("^([##\.a-zA-Z_-]|(&:)|(&\.)|(&##))([ ""'>=0-9a-zA-Z_\[\]\*\.\$\)\(\-]+)?(?!:)([ 0-9a-zA-Z_-]+)?$", trim(listGetAt(arguments.line,i)))){
-				result = true;
-			}
-			else{
-				result = false;
-				break;
-			}
-		}
-		
-		return result;
-	}
-	
-	function isVar(line){
-		if(REFind("^![0-9a-zA-Z_-]+( +)?=( +)?\S", trim(arguments.line))){
-			return true;
-		}
-		else{
-			return false;
-		}
 	}
 	
 	function stripQuotes(string){
@@ -250,6 +236,61 @@
 			}
 		}
 		return count;
+	}
+	
+	// tries to figure out what the line is
+	function whatIsIt(line){
+		if(not len(trim(arguments.line))){
+			return "blank";
+		}
+		if(isSelector(arguments.line)){
+			return "selector";
+		}
+		if(isQuietComment(arguments.line)){
+			return "quietComment";
+		}
+		if(isVarDefinition(arguments.line)){
+			return "assignment";
+		}
+		return "cssRule";
+	}
+	
+	// selector test
+	function isSelector(line){
+		var i = 1;
+		var result = false;
+		
+		for(i = 1; i lte listLen(arguments.line, ','); i=i+1){
+			if(REFind("^([##\.a-zA-Z_-]|(&:)|(&\.)|(&##))([ ""'>=0-9a-zA-Z_\[\]\*\.\$\)\(\-]+)?(?!:)([ 0-9a-zA-Z_-]+)?$", trim(listGetAt(arguments.line,i)))){
+				result = true;
+			}
+			else{
+				result = false;
+				break;
+			}
+		}
+		
+		return result;
+	}
+	
+	// variable definition test
+	function isVarDefinition(line){
+		if(REFind("^![0-9a-zA-Z_-]+( +)?=( +)?\S", trim(arguments.line))){
+			return true;
+		}
+		else{
+			return false;
+		}
+	}
+	
+	// quiet comment test
+	function isQuietComment(line){
+		if(REFind("^//", trim(arguments.line))){
+			return true;
+		}
+		else{
+			return false;
+		}
 	}
 </cfscript>
 
