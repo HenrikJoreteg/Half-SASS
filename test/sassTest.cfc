@@ -90,6 +90,8 @@ component extends="coldbox.system.testing.BasePluginTest" {
 		}
 	}
 	
+	
+	
 	function test_isSelector(){
 		
 		// test the valid ones
@@ -147,6 +149,35 @@ component extends="coldbox.system.testing.BasePluginTest" {
 			debug("#a[i][1]# #a[i][2]#");
 			
 			assertEquals(sass.stripQuotes(a[i][1]),a[i][2]);		
+		}
+	}
+	
+	function test_cssRuleContainsVar(){
+		var i = 1;
+		var j = 1;
+		var valid_vars = [
+			"font-size = !padding",
+			"font-size=!padding",
+			"font-size= !padding",
+			"font-size =!padding"
+		];
+		
+		var invalid_vars = [
+			"text-align: right",
+			"font-size: 26px",
+			"text-align: right"
+		];
+		
+		// test the valid ones
+		for(i = 1; i LTE arrayLen(valid_vars); i = i + 1){
+			debug(valid_vars[i]);
+			assertTrue(sass.cssRuleContainsVar(valid_vars[i]));
+		}
+		
+		// test the invalid ones
+		for(j = 1; j LTE arrayLen(invalid_vars); j = j + 1){
+			debug(invalid_vars[j]);
+			assertFalse(sass.cssRuleContainsVar(invalid_vars[j]));		
 		}
 	}
 		

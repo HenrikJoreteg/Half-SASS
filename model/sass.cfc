@@ -1,6 +1,7 @@
 <cfcomponent>
 <cfscript>
-	this.currentSelector = '';
+	instance = structNew();
+	instance.definitions = structNew();
 	
 	function sass2css(file){
 		var result = '';
@@ -16,7 +17,6 @@
 		var x = '';
 		var var_name = '';
 		var var_value = '';
-		var definitions = structNew();
 		
 		
 		while(NOT FileisEOF(arguments.file)){ 
@@ -61,13 +61,15 @@
 				} // end selector
 				else if(isVar(x)){
 					// this is a variable definition record it
-					definitions[removeChars(trim(listGetAt(x,1,"=")),1,1)] = getVarName(x);
-					//dump(definitions,1);
+					instance.definitions[removeChars(trim(listGetAt(x,1,"=")),1,1)] = getDefinitionVarValue(x);
+					//dump(instance.definitions,1);
 				}
 				else {
 					// this is a css rule, append semi-colon
 					// look for variables... swap 'em out
-					
+					if(cssRuleContainsVar(x)){
+						x = insertVariablesInRule(x);
+					}
 					line_result = x & ";";
 				}
 			}
@@ -104,7 +106,7 @@
 	
 	function cssRuleContainsVar(string){
 		// left off here
-		if(REFind(arguments.string,"=( +)?!\S")){
+		if(REFind("=( +)?!\S", arguments.string)){
 			return true;
 		}
 		else{
@@ -112,21 +114,28 @@
 		}
 	}
 	
-	function getVarName(string){
+	function getDefinitionVarValue(string){
 		return stripQuotes(listGetAt(arguments.string,2,"="));
 	}
 	
+	function getVarName(string){
+		return removeChars(stripQuotes(listGetAt(arguments.string,2,"=")),1,1);
+	}
+	
 	function getVarValue(string){
-		if(structKeyExists(definitions, arguments.string)){
-			return definitions[arguments.string];
+		if(structKeyExists(instance.definitions, arguments.string)){
+			return instance.definitions[arguments.string];
 		}
 		else{
 			// TODO: throw error
 		}
 	}
 	
-	function insertVariablesInRule(line){
+	function insertVariablesInRule(string){
+		var left = listGetAt(arguments.string, 1, "=");
+		var var_name = getVarName(arguments.string);
 		
+		return rtrim(left) & ": " & getVarValue(var_name);
 	}
 	
 	function isSelector(line){
@@ -153,14 +162,6 @@
 		else{
 			return false;
 		}
-	}
-	
-	function processCSSRule(string){
-		var position = REFind("=( +)?!\S",arguments.string);
-		if(position){
-			//return REReplace(arguments.string,"",) & ';';	
-		}
-		return arguments.string;
 	}
 	
 	function stripQuotes(string){
@@ -253,7 +254,7 @@
 <!--- dump --->
 <cffunction name="dump" access="public" returntype="any" output="false">
 	<cfargument name="myvar">
-	<cfargument name="abort" default="true">
+	<cfargument name="abort" default="false">
 	<cfdump var="#arguments.myvar#"><cfif arguments.abort><cfabort></cfif>
 </cffunction>
 </cfcomponent>
