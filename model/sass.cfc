@@ -17,10 +17,12 @@
 		var x = '';
 		var var_name = '';
 		var var_value = '';
+		var delim = "#chr(10)#";
+		var j = 0;
+			
 		
-		
-		while(NOT FileisEOF(arguments.file)){ 
-			x = FileReadLine(arguments.file);
+		for(j=1;j lte listLen(file,delim);j=j+1){
+			x = rtrim(listGetAt(file,j,delim));
 			
 			// if it's validly indented
 			if(isValidIndent(x)){
@@ -81,7 +83,7 @@
 			}
 					
 			// add newline character and append to result
-			result = result & "#line_result##CHR(13)#";
+			result = result & "#line_result##delim#";
 		} 
 		
 		// there may be unclosed brackets at the very end, we need to close those up
