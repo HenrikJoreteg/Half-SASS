@@ -6,7 +6,6 @@
 	function sass2css(file){
 		var result = '';
 		var line_result = '';
-		var unclosed = 0;
 		var indent = 0;
 		var prev_indent = 0;
 		var selector_array = arrayNew(1);
@@ -20,12 +19,32 @@
 		var delim = "#chr(10)#";
 		var j = 0;
 		var ignore = false;
-			
+		var clean_file = '';
+		var previous_type = 0;
+		var unclosed = false;
 		
+		// first run, cleans out comments and sets variable definitions
 		for(j=1;j lte listLen(file,delim);j=j+1){
-			x = rtrim(listGetAt(file,j,delim));
+			x = listGetAt(file,j,delim);
+			ignore = false;
+			if(isAssignment(x)){
+				instance.definitions[removeChars(trim(listGetAt(x,1,"=")),1,1)] = getDefinitionVarValue(x);
+				ignore = true;
+			}
+			// clean out comments
+			if(REFind("^//",trim(x))){
+				ignore = true;
+			}
+			x = REReplace(x,"//.+$","","one");
+			if(not ignore){
+				clean_file = clean_file & x & delim;
+			} 
+		}
+		
+		for(j=1;j lte listLen(clean_file,delim);j=j+1){
+			x = rtrim(listGetAt(clean_file,j,delim));
 			
-			// this is our ignore flag
+			// these are our processing flags
 			ignore = false;
 			
 			// if it's validly indented
@@ -46,7 +65,9 @@
 			
 			switch(whatIsIt(x)){
 				case "selector":{
+					// clear our working array
 					ArrayClear(partial_selector_array);
+					// loop through selectors in this line, in case there are multiple
 					for(i=1; i lte listLen(x,','); i=i+1){
 						current_selector = trim(listGetAt(x,i));
 					
@@ -61,17 +82,16 @@
 					
 					// tack on the opening bracket and spacing count it
 					line_result = RepeatString(" ", (position-1)*2) & ArrayToList(partial_selector_array, ', ') & "{";
-					unclosed = unclosed + 1;
-					break;
-				}
-				case "isVar":{
-					// this is a variable definition record it
-					instance.definitions[removeChars(trim(listGetAt(x,1,"=")),1,1)] = getDefinitionVarValue(x);
-					break;
-				}
-				case "quietComment":{
-					// do nothing we just want to ignore this comment
-					ignore = true;
+					
+					if(unclosed){
+						result = result & "}#delim#";
+						unclosed = false;
+					}
+					
+					// set our unclosed flag
+					unclosed = true;
+					
+					result = result & "#line_result##delim#";
 					break;
 				}
 				case "cssRule":{
@@ -80,28 +100,19 @@
 						x = insertVariablesInRule(x);
 					}
 					// this is a css rule, append semi-colon
-					line_result = x & ";";
+					result = result & "#x#;#delim#";
+					
 					break;
 				}
 				case "blank":{
-					if(unclosed gt 0){
-						line_result = "}";
-						unclosed = unclosed - 1;
-					}
 					break;
 				}
-			}
-								
-			// add newline character and append to result
-			if(not ignore){
-				result = result & "#line_result##delim#";
 			}
 		} 
 		
 		// there may be unclosed brackets at the very end, we need to close those up
-		while(unclosed gt 0){
+		if(unclosed){
 			result = result & "}";
-			unclosed = unclosed - 1;
 		}
 		
 		return result;
@@ -118,7 +129,6 @@
 	}
 	
 	function cssRuleContainsVar(string){
-		// left off here
 		if(REFind("=( +)?!\S", arguments.string)){
 			return true;
 		}
@@ -240,19 +250,21 @@
 	
 	// tries to figure out what the line is
 	function whatIsIt(line){
-		if(not len(trim(arguments.line))){
+		if(isBlank(arguments.line)){
 			return "blank";
 		}
 		if(isSelector(arguments.line)){
 			return "selector";
 		}
-		if(isQuietComment(arguments.line)){
-			return "quietComment";
-		}
-		if(isVarDefinition(arguments.line)){
-			return "assignment";
-		}
 		return "cssRule";
+	}
+	
+	// blank test
+	function isBlank(line){
+		if(not len(trim(arguments.line))){
+			return true;
+		}
+		return false;
 	}
 	
 	// selector test
@@ -261,7 +273,7 @@
 		var result = false;
 		
 		for(i = 1; i lte listLen(arguments.line, ','); i=i+1){
-			if(REFind("^([##\.a-zA-Z_-]|(&:)|(&\.)|(&##))([ ""'>=0-9a-zA-Z_\[\]\*\.\$\)\(\-]+)?(?!:)([ 0-9a-zA-Z_-]+)?$", trim(listGetAt(arguments.line,i)))){
+			if(REFind("^([##\.a-zA-Z_-]|(&:)|(&>)|(&\.)|(&##))([ ""'>=0-9a-zA-Z_\[\]\*\.\$\)\(\-]+)?(?!:)([ 0-9a-zA-Z_-]+)?$", trim(listGetAt(arguments.line,i)))){
 				result = true;
 			}
 			else{
@@ -274,13 +286,11 @@
 	}
 	
 	// variable definition test
-	function isVarDefinition(line){
+	function isAssignment(line){
 		if(REFind("^![0-9a-zA-Z_-]+( +)?=( +)?\S", trim(arguments.line))){
 			return true;
 		}
-		else{
-			return false;
-		}
+		return false;
 	}
 	
 	// quiet comment test
@@ -288,9 +298,7 @@
 		if(REFind("^//", trim(arguments.line))){
 			return true;
 		}
-		else{
-			return false;
-		}
+		return false;
 	}
 </cfscript>
 
@@ -363,11 +371,15 @@
 	<cffile action="write" output="#css#" file="#arguments.directoryPath#\#getFileName(arguments.SASSFile)#.css">
 </cffunction>
 
-
 <!--- dump --->
 <cffunction name="dump" access="public" returntype="any" output="false">
 	<cfargument name="myvar">
 	<cfargument name="abort" default="false">
 	<cfdump var="#arguments.myvar#"><cfif arguments.abort><cfabort></cfif>
+</cffunction>
+
+<!--- abort --->
+<cffunction name="abort" access="public" returntype="any" output="false">
+	<cfabort>
 </cffunction>
 </cfcomponent>
