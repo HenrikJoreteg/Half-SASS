@@ -115,6 +115,15 @@
 			result = result & "}";
 		}
 		
+		/* remove all empty rules
+		  this can happen if you nest selectors without any rules ie:
+		  
+		    span
+		      a
+		        background:blue
+		*/
+		result = REReplace(result,"#delim#[^#chr(13)##chr(10)#]+{\s}","","all");
+		
 		return result;
 	}
 	
