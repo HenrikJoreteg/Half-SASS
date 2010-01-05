@@ -32,8 +32,8 @@
 		/// grab mixins
 		//mixins_array = REMatch("(?m)^=[\w\S]+",file);
 		
-		// clean out comments
-		clean_file = REReplace(file,"#delim#([^#delim#]+)?//[^#delim#]+","","all");
+		// clean out comments (works for those on line by themselves or at end of line)
+		clean_file = REReplace(file,"((?m)^\s*)?//[^#chr(13)##chr(10)#]*","","all");
 		
 		// clean out variable definitions
 		clean_file = REReplace(clean_file, assignment_re, "", "all");
