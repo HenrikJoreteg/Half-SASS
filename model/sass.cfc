@@ -22,24 +22,27 @@
 		var clean_file = '';
 		var previous_type = 0;
 		var unclosed = false;
+		var definitions_array = ArrayNew(1);
 		
-		// first run, cleans out comments and sets variable definitions
-		for(j=1;j lte listLen(file,delim);j=j+1){
-			x = listGetAt(file,j,delim);
-			ignore = false;
-			if(isAssignment(x)){
-				instance.definitions[removeChars(trim(listGetAt(x,1,"=")),1,1)] = getDefinitionVarValue(x);
-				ignore = true;
-			}
-			// clean out comments
-			if(REFind("^//",trim(x))){
-				ignore = true;
-			}
-			x = REReplace(x,"//.+$","","one");
-			if(not ignore){
-				clean_file = clean_file & x & delim;
-			} 
+		// regular expressions
+		var assignment_re = "(?m)^![0-9a-zA-Z_-]+ *= *\S*";
+		
+		// grab definitions
+		definitions_array = REMatch(assignment_re, file);
+		/// grab mixins
+		//mixins_array = REMatch("(?m)^=[\w\S]+",file);
+		
+		// clean out comments
+		clean_file = REReplace(file,"#delim#([^#delim#]+)?//[^#delim#]+","","all");
+		
+		// clean out variable definitions
+		clean_file = REReplace(clean_file, assignment_re, "", "all");
+		
+		// set variables into definitions structure
+		for(j=1;j lte arrayLen(definitions_array);j=j+1){
+			instance.definitions[removeChars(trim(listGetAt(definitions_array[j],1,"=")),1,1)] = getDefinitionVarValue(definitions_array[j]);
 		}
+		
 		
 		for(j=1;j lte listLen(clean_file,delim);j=j+1){
 			x = rtrim(listGetAt(clean_file,j,delim));
@@ -110,10 +113,8 @@
 			}
 		} 
 		
-		// there may be unclosed brackets at the very end, we need to close those up
-		if(unclosed){
-			result = result & "}";
-		}
+		// there will be an unclosed bracket at the very end close it
+		result = result & "}";
 		
 		/* remove all empty rules
 		  this can happen if you nest selectors without any rules ie:
