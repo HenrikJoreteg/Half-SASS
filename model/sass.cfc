@@ -273,22 +273,26 @@
 		var i = 0;
 		var name = 0;
 		var reg_ex = "^\S+[#instance.delim#]\n";
-		var working_value = 0;
+		var working_value = '';
 		var value = '';
 		
 		// loop through array of matches and build mixins structure
 		for(x=1; x lte arrayLen(arguments.array); x=x+1){
 			name = REMatch(reg_ex,arguments.array[x]);
 			name = removeChars(name[1], 1,1);
-			working_value = REReplace(arguments.array[x], reg_ex, '');
-			
+			value = REReplace(arguments.array[x], reg_ex, '');
+			// trim extra blank lines if any
+			value = rtrim(value);
+			// clear working value
+			working_value = '';
+				
 			// loop through value and trim lines
-			for(i=1; i lte listLen(working_value,instance.delim);i=i+1){
-				value = value & trim(listGetAt(working_value,i,instance.delim)) & instance.delim;
+			for(i=1; i lte listLen(value,instance.delim);i=i+1){
+				working_value = working_value & removeChars(listGetAt(value,i,instance.delim),1,2) & instance.delim;
 			}
-			
-			instance.mixins[name] = value;	
+			instance.mixins[name] = working_value;	
 		}
+		
 	}
 	
 	// register definitions (variable assignments)
@@ -313,6 +317,9 @@
 		}
 		if(isSelector(arguments.line)){
 			return "selector";
+		}
+		if(isMixin(arguments.line)){
+			return "mixin";
 		}
 		return "cssRule";
 	}
@@ -351,9 +358,9 @@
 		return false;
 	}
 	
-	// quiet comment test
-	function isQuietComment(line){
-		if(REFind("^//", trim(arguments.line))){
+	// mixin test
+	function isMixin(line){
+		if(REFind("^\+", trim(arguments.line))){
 			return true;
 		}
 		return false;
