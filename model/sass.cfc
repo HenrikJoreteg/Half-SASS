@@ -3,6 +3,7 @@
 	instance = structNew();
 	instance.definitions = structNew();
 	instance.mixins = structNew();
+	instance.delim = chr(13) & chr(10);
 	
 	function sass2css(file){
 		var result = '';
@@ -27,7 +28,7 @@
 		
 		// regular expressions
 		var assignment_re = "(?m)^![0-9a-zA-Z_-]+ *= *\S*";
-		var mixin_re = "=[\S]*[#chr(13)##chr(10)#]+\n( +[\S\t ]+[#chr(13)##chr(10)#]+\n)*";
+		var mixin_re = "=[\S]*[#instance.delim#]+\n( +[\S\t ]+[#instance.delim#]+\n)*";
 		
 		// grab definitions
 		definitions_array = REMatch(assignment_re, file);
@@ -41,9 +42,9 @@
 		
 		
 		// clean out comments (works for those on line by themselves or at end of line)
-		clean_file = REReplace(file,"((?m)^\s*)?//[^#chr(13)##chr(10)#]*","","all");
+		clean_file = REReplace(file,"((?m)^\s*)?//[^#instance.delim#]*","","all");
 		
-		// clean out variable definitions and mixins
+		// clean out variable definitions and mixin definitions
 		clean_file = REReplace(clean_file, assignment_re, "", "all");
 		clean_file = REReplace(clean_file, mixin_re, "", "all");
 		
@@ -117,7 +118,7 @@
 			}
 		} 
 		
-		// there will be an unclosed bracket at the very end close it
+		// there will be an unclosed bracket at the very end, close it
 		result = result & "}";
 		
 		/* remove all empty rules
@@ -127,7 +128,7 @@
 		      a
 		        background:blue
 		*/
-		result = REReplace(result,"#delim#[^#chr(13)##chr(10)#]+{\s}","","all");
+		result = REReplace(result,"#delim#[^#instance.delim#]+{\s}","","all");
 		
 		return result;
 	}
@@ -272,10 +273,9 @@
 		var x = 0;
 		var i = 0;
 		var name = 0;
-		var reg_ex = "^\S+[#chr(13)##chr(10)#]\n";
+		var reg_ex = "^\S+[#instance.delim#]\n";
 		var working_value = 0;
 		var value = '';
-		var delim = "#chr(13)##chr(10)#";
 		
 		// loop through array of matches and build mixins structure
 		for(x=1; x lte arrayLen(arguments.array); x=x+1){
@@ -284,8 +284,8 @@
 			working_value = REReplace(arguments.array[x], reg_ex, '');
 			
 			// loop through value and trim lines
-			for(i=1; i lte listLen(working_value,delim);i=i+1){
-				value = value & trim(listGetAt(working_value,i,delim)) & delim;
+			for(i=1; i lte listLen(working_value,instance.delim);i=i+1){
+				value = value & trim(listGetAt(working_value,i,instance.delim)) & instance.delim;
 			}
 			
 			instance.mixins[name] = value;	
