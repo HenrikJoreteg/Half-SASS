@@ -2,6 +2,7 @@
 <cfscript>
 	instance = structNew();
 	instance.definitions = structNew();
+	instance.mixins = structNew();
 	
 	function sass2css(file){
 		var result = '';
@@ -26,22 +27,25 @@
 		
 		// regular expressions
 		var assignment_re = "(?m)^![0-9a-zA-Z_-]+ *= *\S*";
+		var mixin_re = "=[\S]*[#chr(13)##chr(10)#]+\n( +[\S\t ]+[#chr(13)##chr(10)#]+\n)*";
 		
 		// grab definitions
 		definitions_array = REMatch(assignment_re, file);
-		/// grab mixins
-		//mixins_array = REMatch("(?m)^=[\w\S]+",file);
+		registerDefinitions(definitions_array);
+		//dump(instance.definitions,1);
+		
+		// grab mixins
+		mixins_array = REMatch(mixin_re, file);
+		registerMixIns(mixins_array);
+		//dump(instance.mixins,1);
+		
 		
 		// clean out comments (works for those on line by themselves or at end of line)
 		clean_file = REReplace(file,"((?m)^\s*)?//[^#chr(13)##chr(10)#]*","","all");
 		
-		// clean out variable definitions
+		// clean out variable definitions and mixins
 		clean_file = REReplace(clean_file, assignment_re, "", "all");
-		
-		// set variables into definitions structure
-		for(j=1;j lte arrayLen(definitions_array);j=j+1){
-			instance.definitions[removeChars(trim(listGetAt(definitions_array[j],1,"=")),1,1)] = getDefinitionVarValue(definitions_array[j]);
-		}
+		clean_file = REReplace(clean_file, mixin_re, "", "all");
 		
 		
 		for(j=1;j lte listLen(clean_file,delim);j=j+1){
@@ -145,6 +149,10 @@
 		else{
 			return false;
 		}
+	}
+	
+	function getDefinitionVarName(string){
+		return removeChars(trim(listGetAt(arguments.string,1,"=")),1,1);
 	}
 	
 	function getDefinitionVarValue(string){
@@ -256,6 +264,47 @@
 			}
 		}
 		return count;
+	}
+	
+	// register mixins
+	// this function receives an array of multi-line matches and registers mixins
+	function registerMixIns(array){
+		var x = 0;
+		var i = 0;
+		var name = 0;
+		var reg_ex = "^\S+[#chr(13)##chr(10)#]\n";
+		var working_value = 0;
+		var value = '';
+		var delim = "#chr(13)##chr(10)#";
+		
+		// loop through array of matches and build mixins structure
+		for(x=1; x lte arrayLen(arguments.array); x=x+1){
+			name = REMatch(reg_ex,arguments.array[x]);
+			name = removeChars(name[1], 1,1);
+			working_value = REReplace(arguments.array[x], reg_ex, '');
+			
+			// loop through value and trim lines
+			for(i=1; i lte listLen(working_value,delim);i=i+1){
+				value = value & trim(listGetAt(working_value,i,delim)) & delim;
+			}
+			
+			instance.mixins[name] = value;	
+		}
+	}
+	
+	// register definitions (variable assignments)
+	// this function receives an array of multi-line matches and registers mixins
+	function registerDefinitions(array){
+		var x = 0;
+		var name = 0;
+		var value = 0;
+		
+		// loop through array of matches and build definitions structure
+		for(x=1; x lte arrayLen(arguments.array); x=x+1){
+			name = getDefinitionVarName(arguments.array[x]);
+			value = getDefinitionVarValue(arguments.array[x]);
+			instance.definitions[name] = value;	
+		}
 	}
 	
 	// tries to figure out what the line is
