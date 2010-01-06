@@ -18,7 +18,6 @@
 		var x = '';
 		var var_name = '';
 		var var_value = '';
-		var delim = "#chr(10)#";
 		var j = 0;
 		var ignore = false;
 		var clean_file = '';
@@ -49,8 +48,8 @@
 		clean_file = REReplace(clean_file, mixin_re, "", "all");
 		
 		
-		for(j=1;j lte listLen(clean_file,delim);j=j+1){
-			x = rtrim(listGetAt(clean_file,j,delim));
+		for(j=1;j lte listLen(clean_file,instance.delim);j=j+1){
+			x = rtrim(listGetAt(clean_file,j,instance.delim));
 			
 			// these are our processing flags
 			ignore = false;
@@ -92,14 +91,14 @@
 					line_result = RepeatString(" ", (position-1)*2) & ArrayToList(partial_selector_array, ', ') & "{";
 					
 					if(unclosed){
-						result = result & "}#delim#";
+						result = result & "}#instance.delim#";
 						unclosed = false;
 					}
 					
 					// set our unclosed flag
 					unclosed = true;
 					
-					result = result & "#line_result##delim#";
+					result = result & "#line_result##instance.delim#";
 					break;
 				}
 				case "cssRule":{
@@ -108,7 +107,7 @@
 						x = insertVariablesInRule(x);
 					}
 					// this is a css rule, append semi-colon
-					result = result & "#x#;#delim#";
+					result = result & "#x#;#instance.delim#";
 					
 					break;
 				}
@@ -128,7 +127,7 @@
 		      a
 		        background:blue
 		*/
-		result = REReplace(result,"#delim#[^#instance.delim#]+{\s}","","all");
+		result = REReplace(result,"#instance.delim#[^#instance.delim#]+{\s+}","","all");
 		
 		return result;
 	}
