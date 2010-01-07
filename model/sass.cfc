@@ -28,7 +28,7 @@
 		var mixin_array = ArrayNew(1);
 		
 		// regular expressions
-		var assignment_re = "(?m)^![0-9a-zA-Z_-]+ *= *\S*";
+		var assignment_re = "(?m)^![0-9a-zA-Z_-]+ *= *[\S\t ]*";
 		var mixin_re = "=[\S]*[#instance.delim#]+\n( +[\S\t ]+[#instance.delim#]+\n)*";
 		
 		// clean out comments (works for those on line by themselves or at end of line)
@@ -91,7 +91,7 @@
 			}
 			else{
 				// TODO: throw indentation error
-				writeDump(var="it thinks there's an invalid indent", abort=true);
+				writeDump(var="It thinks there's an indentation error. Around line #j#", abort=true);
 			}
 			
 			
@@ -338,7 +338,6 @@
 	}
 	
 	// register definitions (variable assignments)
-	// this function receives an array of multi-line matches and registers mixins
 	function registerDefinitions(array){
 		var x = 0;
 		var name = 0;
