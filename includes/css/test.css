@@ -1,0 +1,25 @@
+h1 {
+  -moz-border-radius: 15px;
+  -webkit-border-radius: 15px;
+  height: 118px;
+  margin-top: 1em;
+}
+.tagline{
+  font-size: 5px;
+  text-align: right;
+}
+.tagline span a{
+	-moz-border-radius: 15px;
+	-webkit-border-radius: 15px;
+	font-size: 26px;
+	text-align: right;	
+}
+.tagline span .hello{
+	stuff: 23px;
+}
+.tagline span:hover, .tagline span:active{
+	background-color: #FFF;
+}
+.tagline h3 {
+    padding: 5px;
+}

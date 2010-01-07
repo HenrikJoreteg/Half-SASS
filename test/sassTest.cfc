@@ -182,6 +182,16 @@ component extends="coldbox.system.testing.BasePluginTest" {
 	}
 		
 	function test_sass2css(){
-	
+		var sass_file = fileRead("C:\ColdFusion9\wwwroot\FormDaddyDev\includes\css\test.sass");
+		var css_file = fileRead("C:\ColdFusion9\wwwroot\FormDaddyDev\includes\css\test.css");
+		var re = "\s";
+			
+		sass_file = sass.sass2css(sass_file);
+		sass_file = REReplace(sass_file, re, "", "all");
+		css_file = REReplace(css_file, re, "", "all");
+		
+		debug(css_file);
+		
+		assertEquals(sass_file,css_file);
 	}
 }
