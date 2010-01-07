@@ -1,24 +1,18 @@
-
-
+!rounded_corner = 15px
 !other_setting = 5px
-
 !padding = 5px
-
 
 =rounded_corners_2
   -moz-border-radius = !rounded_corner
   -webkit-border-radius = !rounded_corner
-
 
 =rounded_corners
   -moz-border-radius = !rounded_corner
   -webkit-border-radius = !rounded_corner
 
 
-
-
-
 h1
+  +rounded_corners
   height: 118px
   margin-top: 1em
 
@@ -28,6 +22,7 @@ h1
   
   span
     a
+      +rounded_corners_2
       font-size: 26px
       text-align: right
     

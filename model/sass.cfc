@@ -21,9 +21,11 @@
 		var j = 0;
 		var ignore = false;
 		var clean_file = '';
+		var file_with_mixins = '';
 		var previous_type = 0;
 		var unclosed = false;
 		var definitions_array = ArrayNew(1);
+		var mixin_array = ArrayNew(1);
 		
 		// regular expressions
 		var assignment_re = "(?m)^![0-9a-zA-Z_-]+ *= *\S*";
@@ -47,9 +49,33 @@
 		clean_file = REReplace(clean_file, assignment_re, "", "all");
 		clean_file = REReplace(clean_file, mixin_re, "", "all");
 		
-		
+		// insert mixins
 		for(j=1;j lte listLen(clean_file,instance.delim);j=j+1){
 			x = rtrim(listGetAt(clean_file,j,instance.delim));
+			my_indent = getIndent(x);
+			line_result = '';
+			if(isMixin(x)){
+				//dump(getMixinValue(getMixinName(x)),1);
+				mixin_array = getMixinValue(getMixinName(x));
+				
+				// loop through lines of mixin and make sure they're indented properly
+				for(x=1; x lte arrayLen(mixin_array); x=x+1){
+					line_result = line_result & repeatString(" ", my_indent) & mixin_array[x] & instance.delim;
+				}
+				
+				line_result = line_result;
+			}
+			else{
+				line_result = x & instance.delim;
+			}
+			file_with_mixins = file_with_mixins & line_result;
+		}
+		
+		//writeOutput(file_with_mixins);
+		//abort();
+		
+		for(j=1;j lte listLen(file_with_mixins,instance.delim);j=j+1){
+			x = rtrim(listGetAt(file_with_mixins,j,instance.delim));
 			
 			// these are our processing flags
 			ignore = false;
@@ -172,6 +198,19 @@
 		}
 	}
 	
+	function getMixinName(string){
+		return removeChars(trim(arguments.string),1,1);
+	}
+	
+	function getMixinValue(string){
+		if(structKeyExists(instance.mixins, arguments.string)){
+			return instance.mixins[arguments.string];
+		}
+		else{
+			// TODO: throw error
+		}
+	}
+	
 	function insertVariablesInRule(string){
 		var left = listGetAt(arguments.string, 1, "=");
 		var var_name = getVarName(arguments.string);
@@ -273,24 +312,24 @@
 		var i = 0;
 		var name = 0;
 		var reg_ex = "^\S+[#instance.delim#]\n";
-		var working_value = '';
+		var working_array = arrayNew(1);
 		var value = '';
 		
 		// loop through array of matches and build mixins structure
 		for(x=1; x lte arrayLen(arguments.array); x=x+1){
 			name = REMatch(reg_ex,arguments.array[x]);
-			name = removeChars(name[1], 1,1);
+			name = trim(removeChars(name[1], 1,1));
 			value = REReplace(arguments.array[x], reg_ex, '');
 			// trim extra blank lines if any
 			value = rtrim(value);
 			// clear working value
-			working_value = '';
+			ArrayClear(working_array);
 				
 			// loop through value and trim lines
 			for(i=1; i lte listLen(value,instance.delim);i=i+1){
-				working_value = working_value & removeChars(listGetAt(value,i,instance.delim),1,2) & instance.delim;
+				arrayAppend(working_array, removeChars(listGetAt(value,i,instance.delim),1,2));
 			}
-			instance.mixins[name] = working_value;	
+			instance.mixins[name] = working_array;	
 		}
 		
 	}
