@@ -32,7 +32,7 @@
 		var mixin_re = "=[\S]*[#instance.delim#]+\n( +[\S\t ]+[#instance.delim#]+\n)*";
 		
 		// clean out comments (works for those on line by themselves or at end of line)
-		clean_file = REReplace(file,"((?m)^\s*)?//[^#instance.delim#]*","","all");
+		clean_file = REReplace(file,"((?m)^\s*)?[ \t]*//[^#instance.delim#]*","","all");
 		
 		// grab definitions
 		definitions_array = REMatch(assignment_re, clean_file);
@@ -42,7 +42,7 @@
 		// grab mixins
 		mixins_array = REMatch(mixin_re, clean_file);
 		registerMixIns(mixins_array);
-		//dump(instance.mixins,1);
+		//dump(mixins_array,1);
 		
 		// clean out variable definitions and mixin definitions
 		clean_file = REReplace(clean_file, assignment_re, "", "all");
@@ -321,7 +321,6 @@
 			name = REMatch(reg_ex,arguments.array[x]);
 			name = trim(removeChars(name[1], 1,1));
 			//if(REFind("",name)){
-			
 			value = REReplace(arguments.array[x], reg_ex, '');
 			// trim extra blank lines if any
 			value = rtrim(value);
