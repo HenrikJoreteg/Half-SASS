@@ -4,6 +4,17 @@ This project is in no way affiliated with the original SASS project. I'm just a 
 In it's current state this is only a partial implementation of [Syntactically Awesome Style Sheets (SASS)](http://sass-lang.com/), but it's written entirely in CFML.
 For those unfamiliar with SASS it's an abstraction layer for CSS. CSS is insanely repetitive. So SASS makes it DRY.
 
+##Usage
+The easiest way to use this is to call processSASSFiles("absolute/path/to/sass/directory"). This function will do a CF directory and if the SASS file has been edited more recently than the corresponding css file it will process the sass file again and write a *.css file of the same name. For example, "test.sass" becomes "test.css" and gets written into the same folder. 
+
+In your layouts you can just reference the css file because they will be dynamically generated if need be.
+
+If you're building a coldbox app, I would suggest bundling this as an interceptor that is only active in your development server (no need for wasting processing in production).
+
+If you don't want to use processSASSFiles(), all the processing happens in the sass2css() function of the SASS object. This function expects a sass file as a string. Most of the time this will be handled with a FileRead("/path/to/file.sass").
+
+The sass2css function will return the css as a string, you can write it to file or whatever.
+
 For example:
 
     !my_var = 118px 		// declaring a variable
