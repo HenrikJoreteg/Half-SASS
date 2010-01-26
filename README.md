@@ -19,7 +19,7 @@ For example:
 
     !my_var = 118px 		// declaring a variable
 
-    =my_mixin 			// this is a mixin, you can think of it like a snippet 
+    =my_mixin 			    // this is a mixin, you can think of it like a snippet 
       height = !my_var 		// mixins can contain varibles as well
       background-color: blue
       border: 1px solid black
@@ -59,7 +59,6 @@ becomes:
         background-color: purple;
     }
     
-In it's current state half-sass can produce the code above, but the real SASS implementation has other features like support for math, advanced importing of other SASS stylesheets and definitions. As well as support for mix-ins with arguments and a bunch of other cool stuff.
-It is unlikely that I'll take it quite that far. But this code will let me at least take advantage of some of the things I always wish that CSS had, like variables and mixins.
+In it's current state half-sass can produce the code above, but the real SASS implementation has other features like support for math, advanced importing of other SASS stylesheets and definitions. As well as support for mix-ins with arguments and a bunch of other cool stuff. 
 
-Since I'm no longer working in a CF job, this project is not longer actively maintained by the author: Henrik Joreteg. If you're interested in continuing development and you know how to write and run unit tests in MXUnit, contact me.
+Since I'm no longer working in a CF job, this project is no longer actively maintained by the author: Henrik Joreteg. If you're interested in continuing development just fork this project and go at it.
