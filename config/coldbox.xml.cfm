@@ -7,7 +7,7 @@
 		<Setting name="DebugMode" 					value="true" />
 		<Setting name="DebugPassword" 				value=""/>
 		<Setting name="ReinitPassword" 				value=""/>
-		<Setting name="DefaultEvent" 				value="general.index"/>
+		<Setting name="DefaultEvent" 				value="test.testsass"/>
 		<Setting name="RequestStartHandler" 		value="main.onRequestStart"/>
 		<Setting name="ApplicationStartHandler" 	value="main.onAppInit"/>
 		<Setting name="onInvalidEvent" 				value="" />
@@ -17,10 +17,6 @@
 		<Setting name="EventCaching" 				value="false"/>
 	</Settings>
 
-	<YourSettings>
-		<Setting name="FormDaddy_ConfigFile"    value="${AppMapping}/plugins/formdaddy/test/Forms.cfm" />
-	</YourSettings>
-	
 	<DebuggerSettings>
 		<PersistentRequestProfiler>true</PersistentRequestProfiler>
 		<maxPersistentRequestProfilers>10</maxPersistentRequestProfilers>
