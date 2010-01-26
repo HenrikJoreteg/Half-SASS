@@ -6,6 +6,8 @@ For those unfamiliar with SASS it's an abstraction layer for CSS. CSS is insanel
 
 Since I'm no longer working in a CF job, this project is no longer actively maintained by the author: Henrik Joreteg. If you're interested in continuing development just fork this project and go at it.
 
+This repo is bundled as a ColdBox application, but all the logic is in "model/sass.cfc" and you could easily use it in any CF project. Just see the usage below.
+
 ##Usage
 The easiest way to use this is to call processSASSFiles("absolute/path/to/sass/directory"). This function will do a CF directory and if the SASS file has been edited more recently than the corresponding css file it will process the sass file again and write a *.css file of the same name. For example, "test.sass" becomes "test.css" and gets written into the same folder. 
 
