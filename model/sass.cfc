@@ -1,10 +1,12 @@
 <cfcomponent>
 <cfscript>
+	// globals
 	instance = structNew();
 	instance.definitions = structNew();
 	instance.mixins = structNew();
 	instance.delim = chr(13) & chr(10);
 	
+	// the main file processor
 	function sass2css(file){
 		var result = '';
 		var line_result = '';
@@ -157,16 +159,7 @@
 		return result;
 	}
 	
-	function appendSelector(newSelector){
-		if(len(this.currentSelector)){
-			this.currentSelector = this.currentSelector & " " & arguments.newSelector;	
-		}
-		else {
-			this.currentSelector = arguments.newSelector;
-		}
-		return this.currentSelector;
-	}
-	
+	// helper to determine if a given line uses a variable
 	function cssRuleContainsVar(string){
 		if(REFind("=( +)?!\S", arguments.string)){
 			return true;
@@ -176,18 +169,28 @@
 		}
 	}
 	
+	// helper for retriving name of variable being declared, expects one line of code
+	// used when setting variables
 	function getDefinitionVarName(string){
 		return removeChars(trim(listGetAt(arguments.string,1,"=")),1,1);
 	}
 	
+	// helper for getting the value of the variable being declared, expects one line of code
+	// used when setting variables
 	function getDefinitionVarValue(string){
 		return stripQuotes(listGetAt(arguments.string,2,"="));
 	}
 	
+	// retrieves name of variable to lookup
+	// expects one line of code
+	// used when retriving values
 	function getVarName(string){
 		return removeChars(stripQuotes(listGetAt(arguments.string,2,"=")),1,1);
 	}
 	
+	// retrieves value of a variable from
+	// expects name of variable
+	// used when retriving values
 	function getVarValue(string){
 		if(structKeyExists(instance.definitions, arguments.string)){
 			return instance.definitions[arguments.string];
@@ -197,11 +200,13 @@
 		}
 	}
 	
+	// retrieves mixin name from a line in the file
 	function getMixinName(string){
 		arguments.string = REReplace(arguments.string,"\([ \S\t]*\)","");
 		return removeChars(trim(arguments.string),1,1);
 	}
 	
+	// retrieves mixin given the name of the mixin
 	function getMixinValue(string){
 		if(structKeyExists(instance.mixins, arguments.string)){
 			return instance.mixins[arguments.string];
@@ -211,6 +216,7 @@
 		}
 	}
 	
+	// inserts the variable value into the string
 	function insertVariablesInRule(string){
 		var left = listGetAt(arguments.string, 1, "=");
 		var var_name = getVarName(arguments.string);
@@ -218,6 +224,7 @@
 		return rtrim(left) & ": " & getVarValue(var_name);
 	}
 	
+	// cleans variable definitions to remove quotes from strings
 	function stripQuotes(string){
 		var my_string = trim(arguments.string);
 		var left = left(my_string,1);
@@ -232,6 +239,7 @@
 		}
 	}
 	
+	// loops through the current selector array to build string of css selectors to be outputted
 	function buildSelectorString(selector_array){
 		var j = 1;
 		var result = '';
@@ -253,6 +261,7 @@
 		return result;
 	}
 	
+	// ads a selector to the array
 	function setSelectorInArray(selector_array, current_selector, position){
 		var k = 1;
 		var diff = 0;
