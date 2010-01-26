@@ -4,6 +4,8 @@ This project is in no way affiliated with the original SASS project. I'm just a 
 In it's current state this is only a partial implementation of [Syntactically Awesome Style Sheets (SASS)](http://sass-lang.com/), but it's written entirely in CFML.
 For those unfamiliar with SASS it's an abstraction layer for CSS. CSS is insanely repetitive. So SASS makes it DRY.
 
+Since I'm no longer working in a CF job, this project is no longer actively maintained by the author: Henrik Joreteg. If you're interested in continuing development just fork this project and go at it.
+
 ##Usage
 The easiest way to use this is to call processSASSFiles("absolute/path/to/sass/directory"). This function will do a CF directory and if the SASS file has been edited more recently than the corresponding css file it will process the sass file again and write a *.css file of the same name. For example, "test.sass" becomes "test.css" and gets written into the same folder. 
 
@@ -59,6 +61,4 @@ becomes:
         background-color: purple;
     }
     
-In it's current state half-sass can produce the code above, but the real SASS implementation has other features like support for math, advanced importing of other SASS stylesheets and definitions. As well as support for mix-ins with arguments and a bunch of other cool stuff. 
-
-Since I'm no longer working in a CF job, this project is no longer actively maintained by the author: Henrik Joreteg. If you're interested in continuing development just fork this project and go at it.
+In it's current state half-sass can produce the code above, but the real SASS implementation has other features like support for math, advanced importing of other SASS stylesheets and definitions. As well as support for mix-ins with arguments and a bunch of other cool stuff. Someone should fork this project and run with it. 
