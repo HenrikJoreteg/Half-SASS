@@ -51,4 +51,4 @@ becomes:
 In it's current state half-sass can produce the code above, but the real SASS implementation has other features like support for math, advanced importing of other SASS stylesheets and definitions. As well as support for mix-ins with arguments and a bunch of other cool stuff.
 It is unlikely that I'll take it quite that far. But this code will let me at least take advantage of some of the things I always wish that CSS had, like variables and mixins.
 
-Since I'm no longer working in a CF job, this project is not actively maintained by Henrik Joreteg. If you're interested in contributing and you know how to write and run unit tests in MXUnit, contact me.
+Since I'm no longer working in a CF job, this project is not longer actively maintained by the author: Henrik Joreteg. If you're interested in continuing development and you know how to write and run unit tests in MXUnit, contact me.
